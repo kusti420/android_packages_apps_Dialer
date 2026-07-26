@@ -196,6 +196,8 @@ public class InCallPresenter implements CallList.Listener, AudioModeProvider.Aud
       };
   private InCallState inCallState = InCallState.NO_CALLS;
   private ProximitySensor proximitySensor;
+  // Custom Options: crDroid in-call vibration feedback (connect / call-waiting / disconnect).
+  private InCallVibrationHandler inCallVibrationHandler;
   private final PseudoScreenState pseudoScreenState = new PseudoScreenState();
   private boolean serviceConnected;
   private InCallCameraManager inCallCameraManager;
@@ -366,6 +368,10 @@ public class InCallPresenter implements CallList.Listener, AudioModeProvider.Aud
 
     this.proximitySensor = proximitySensor;
     addListener(this.proximitySensor);
+
+    // Custom Options: crDroid in-call vibration feedback (connect / call-waiting / disconnect).
+    this.inCallVibrationHandler = new InCallVibrationHandler(this.context);
+    addListener(this.inCallVibrationHandler);
 
     if (themeColorManager == null) {
       themeColorManager = new ThemeColorManager(new InCallUIMaterialColorMapUtils(this.context));
@@ -1640,6 +1646,12 @@ public class InCallPresenter implements CallList.Listener, AudioModeProvider.Aud
         proximitySensor.tearDown();
       }
       proximitySensor = null;
+
+      // Custom Options: crDroid in-call vibration feedback.
+      if (inCallVibrationHandler != null) {
+        removeListener(inCallVibrationHandler);
+      }
+      inCallVibrationHandler = null;
 
       if (statusBarNotifier != null) {
         removeListener(statusBarNotifier);
